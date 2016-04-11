@@ -1,8 +1,10 @@
 module Minesweeper where
 
+import Board
+import Cell
 import Effects
 import Html
-import Board
+import Row
 
 
 -- MODEL
@@ -41,6 +43,25 @@ update action model =
 
 -- VIEW
 
+displayCell : Cell.Model -> Html.Html
+displayCell cell =
+  case cell.isCovered of
+    True ->
+      Html.button [] [ Html.text "?" ]
+    False ->
+      Html.button [] [ Html.text "X" ]
+
+
+displayRow : Row.Model -> Html.Html
+displayRow row =
+  Html.div [] <| List.map displayCell row.cells
+
+
+displayBoard : Board.Model -> Html.Html
+displayBoard board =
+  Html.div [] <| List.map displayRow board.rows
+
+
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
-  Html.span [] [ Board.view (Signal.forwardTo address Board ) model.board ]
+  Html.span [] [ displayBoard model.board ]

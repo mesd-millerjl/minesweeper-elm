@@ -23,7 +23,6 @@ init width height =
 
 type Action
     = Nothing
-    | Row Row.Action
 
 
 update : Action -> Model -> (Model, Effects.Effects Action)
@@ -31,21 +30,10 @@ update action model =
   case action of
     Nothing ->
       ( model, Effects.none )
-    Row action ->
-      ( { model | rows = List.map fst
-          <| List.map (Row.update action) model.rows
-        }
-      , Effects.none
-      )
 
 
 -- VIEW
 
-displayRow : Signal.Address Action -> Row.Model -> Html.Html
-displayRow address row =
-  Row.view (Signal.forwardTo address Row) row
-
-
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
-  Html.span [] <| List.map (displayRow address) model.rows
+  Html.span [] []

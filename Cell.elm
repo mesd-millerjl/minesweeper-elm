@@ -2,7 +2,6 @@ module Cell where
 
 import Effects
 import Html
-import VirtualDom
 
 
 -- MODEL
@@ -36,14 +35,6 @@ update action model =
 
 -- VIEW
 
-getValue : Model -> VirtualDom.Node
-getValue model =
-  case model.isCovered of
-    True ->
-      Html.button [] [ Html.text "?" ]
-    False ->
-      Html.button [] [ Html.text "X" ]
-
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
-  Html.span [] [ getValue model ]
+  Html.span [] []
