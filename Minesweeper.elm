@@ -4,6 +4,7 @@ import Board
 import Cell
 import Effects
 import Html
+import Html.Events
 import Row
 
 
@@ -11,12 +12,13 @@ import Row
 
 type alias Model =
   { board : Board.Model
+  , isInitial : Bool
   }
 
 
 init : ( Model, Effects.Effects Action )
 init =
-  ( Model <| fst <| Board.init 8 8
+  ( Model (fst <| Board.init 8 8) True
   , Effects.none
   )
 
@@ -25,7 +27,7 @@ init =
 
 type Action
     = Nothing
-    | Board Board.Action
+    | Uncover
 
 
 update : Action -> Model -> ( Model, Effects.Effects Action )
@@ -35,33 +37,46 @@ update action model =
       ( model
       , Effects.none
       )
-    Board action ->
-      ( { model | board = fst <| Board.update action model.board }
-      , Effects.none
-      )
+    Uncover ->
+      case model.isInitial of
+        True ->
+          ( { model | isInitial = False }
+          , Effects.none
+          )
+        False ->
+          ( model
+          , Effects.none
+          )
 
 
 -- VIEW
 
-displayCell : Cell.Model -> Html.Html
-displayCell cell =
+displayCell : Signal.Address Action -> Cell.Model -> Html.Html
+displayCell address cell =
   case cell.isCovered of
     True ->
-      Html.button [] [ Html.text "?" ]
+      Html.button [ Html.Events.onClick address Uncover ] [ Html.text "?" ]
     False ->
       Html.button [] [ Html.text "X" ]
 
 
-displayRow : Row.Model -> Html.Html
-displayRow row =
-  Html.div [] <| List.map displayCell row.cells
+displayRow : Signal.Address Action -> Row.Model -> Html.Html
+displayRow address row =
+  Html.div [] <| List.map (displayCell address) row.cells
 
 
-displayBoard : Board.Model -> Html.Html
-displayBoard board =
-  Html.div [] <| List.map displayRow board.rows
+displayBoard : Signal.Address Action -> Board.Model -> Html.Html
+displayBoard address board =
+  Html.div [] <| List.map (displayRow address) board.rows
 
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
-  Html.span [] [ displayBoard model.board ]
+  Html.span []
+    [ case model.isInitial of
+      True ->
+        Html.text "Initial move"
+      False ->
+        Html.text "Not initial move"
+    , displayBoard address model.board
+    ]
